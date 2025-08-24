@@ -1,0 +1,13 @@
+logger:
+  level: "info"
+  format: "json"
+
+server:
+  host: localhost
+  port: 8080
+
+repo:
+  name: "postgres"
+  dsn: "postgres://postgres:@localhost:5432/postgres?sslmode=disable"
+
+
