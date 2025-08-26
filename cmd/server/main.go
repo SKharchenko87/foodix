@@ -10,6 +10,9 @@ import (
 	"syscall"
 
 	internalconfig "github.com/SKharchenko87/foodix/internal/config"
+	"github.com/SKharchenko87/foodix/internal/repository"
+	"github.com/SKharchenko87/foodix/internal/server"
+	"github.com/SKharchenko87/foodix/internal/service"
 	"github.com/SKharchenko87/foodix/pkg/config"
 	"github.com/SKharchenko87/foodix/pkg/logger"
 )
@@ -46,7 +49,25 @@ func runApp() error {
 	log := logger.InitLogger(cfg.GetLogger())
 	log.InfoContext(ctx, "Starting application", "config_path", args.configPath)
 
-	// ToDo runServer(ctx, log)
+	// Настраиваем репозиторий
+	productRepo, err := repository.NewRepository(ctx, cfg.GetRepo())
+	if err != nil {
+		log.ErrorContext(ctx, "Failed to initialize repository", "error", err)
+		return err
+	}
+	if productRepo != nil {
+		defer productRepo.Close()
+	}
+
+	// Сервис с бизнес логикой
+	productService := service.NewProductService(productRepo)
+
+	// Запускам сервер
+	httpServer := server.NewHTTPServer(cfg.GetServer(), productService, log)
+	if err = httpServer.RunServer(ctx); err != nil {
+		log.ErrorContext(ctx, "Failed to start server", "error", err)
+	}
+
 	// ToDo graceful shutdown.
 
 	log.InfoContext(ctx, "Application stopped successfully")
@@ -67,9 +88,4 @@ func parseArgs() (*appArgs, error) {
 	}
 
 	return &appArgs{pathConfig}, nil
-}
-
-func runServer(ctx context.Context, log *slog.Logger) error {
-	// ToDo
-	return nil
 }
