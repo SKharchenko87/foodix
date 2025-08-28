@@ -3,7 +3,7 @@ package main
 
 import (
 	"context"
-	"flag"
+	"fmt"
 	"log/slog"
 	"os"
 	"os/signal"
@@ -13,12 +13,7 @@ import (
 	internalconfig "github.com/SKharchenko87/foodix/internal/config"
 )
 
-type appArgs struct {
-	configPath string
-}
-
 func main() {
-
 	if err := runApp(); err != nil {
 		slog.Error("Application failed", "error", err)
 		os.Exit(1)
@@ -26,19 +21,19 @@ func main() {
 }
 
 func runApp() error {
+	// Определяем путь к конфигурации
+	configPath, ok := os.LookupEnv("FOODIX_CONFIG")
+	if !ok {
+		return fmt.Errorf("environment variable FOODIX_CONFIG not found")
+	}
+
 	// Создаем контекст, который отслеживает сигналы завершения
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer cancel()
 
-	// Получаем аргументы запуска
-	args, err := parseArgs()
-	if err != nil {
-		return err
-	}
-
 	// Применяем конфигурацию
 	var cfg = internalconfig.NewYAMLConfig()
-	if err = cfg.Load(args.configPath); err != nil {
+	if err := cfg.Load(configPath); err != nil {
 		return err
 	}
 
@@ -54,20 +49,4 @@ func runApp() error {
 	// ToDo graceful shutdown.
 
 	return nil
-}
-
-func parseArgs() (*appArgs, error) {
-	var pathConfig string // Получаем путь к файлу конфигурации
-	flgs := flag.NewFlagSet("server", flag.ExitOnError)
-	flgs.StringVar(&pathConfig, "config", "", "path to config file")
-
-	if err := flgs.Parse(os.Args[1:]); err != nil {
-		return nil, err
-	}
-
-	if pathConfig == "" {
-		return nil, flag.ErrHelp
-	}
-
-	return &appArgs{pathConfig}, nil
 }
