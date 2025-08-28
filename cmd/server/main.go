@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/SKharchenko87/foodix/internal/application"
 	internalconfig "github.com/SKharchenko87/foodix/internal/config"
@@ -37,16 +38,31 @@ func runApp() error {
 		return err
 	}
 
-	// Запускаем приложение
+	// Создаем приложение
 	app, err := application.NewApplication(cfg)
 	if err != nil {
 		return err
 	}
-	if err = app.Start(ctx); err != nil {
-		return err
+
+	// Запускаем приложение в отдельной goroutine, что бы отрабатывал graceful shutdown
+	go func() {
+		if err = app.Start(ctx); err != nil {
+			slog.Error("Application failed", "error", err)
+			cancel()
+		}
+	}()
+
+	// Graceful shutdown полное завершение работы
+	<-ctx.Done()
+	slog.Info("graceful shutting down...")
+
+	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer shutdownCancel()
+
+	if err := app.Stop(shutdownCtx); err != nil {
+		return fmt.Errorf("graceful shutdown failed: %w", err)
 	}
 
-	// ToDo graceful shutdown.
-
+	slog.Info("graceful shutdown complete")
 	return nil
 }

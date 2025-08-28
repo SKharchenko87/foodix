@@ -46,14 +46,13 @@ func NewApplication(cfg config.Config) (*Application, error) {
 	}, nil
 }
 
-// Start todo
+// Start запуск приложения
 func (app *Application) Start(ctx context.Context) error {
 
 	// Инициализируем logger
 	app.logger.InfoContext(ctx, "Starting application")
 
 	// Запускам сервер
-	// ToDo запуск в отдельной goroutine
 	if err := app.server.RunServer(ctx); err != nil {
 		app.logger.ErrorContext(ctx, "Failed to start server", "error", err)
 		return err
@@ -62,8 +61,13 @@ func (app *Application) Start(ctx context.Context) error {
 	return nil
 }
 
-// Stop todo
+// Stop остановка приложения
 func (app *Application) Stop(ctx context.Context) error {
-	// ToDo
+	app.repository.Close()
+	err := app.server.Shutdown(ctx)
+	if err != nil {
+		app.logger.ErrorContext(ctx, "Failed to stop server", "error", err)
+		return err
+	}
 	return nil
 }
