@@ -8,18 +8,18 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-// postgresRepository структура для подключения к БД
-type postgresRepository struct {
+// PostgresRepository структура для подключения к БД
+type PostgresRepository struct {
 	pool *pgxpool.Pool
 }
 
 // Close закрываем пул соединений
-func (p postgresRepository) Close() {
+func (p PostgresRepository) Close() {
 	p.pool.Close()
 }
 
 // GetProduct получаем продукт из БД postgres
-func (p postgresRepository) GetProduct(ctx context.Context, name string) (*models.Product, error) {
+func (p PostgresRepository) GetProduct(ctx context.Context, name string) (*models.Product, error) {
 	r := p.pool.QueryRow(
 		ctx,
 		`select 
