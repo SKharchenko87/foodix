@@ -9,17 +9,17 @@ import (
 )
 
 // PostgresRepository структура для подключения к БД
-type PostgresRepository struct {
+type Repository struct {
 	pool *pgxpool.Pool
 }
 
 // Close закрываем пул соединений
-func (p PostgresRepository) Close() {
+func (p Repository) Close() {
 	p.pool.Close()
 }
 
 // GetProduct получаем продукт из БД postgres
-func (p PostgresRepository) GetProduct(ctx context.Context, name string) (*models.Product, error) {
+func (p Repository) GetProduct(ctx context.Context, name string) (*models.Product, error) {
 	r := p.pool.QueryRow(
 		ctx,
 		`select 

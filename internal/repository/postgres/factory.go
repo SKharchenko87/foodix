@@ -9,7 +9,7 @@ import (
 )
 
 // NewPostgresRepository возвращает экземпляр для подключения к БД postgres
-func NewPostgresRepository(ctx context.Context, cfg config.Repo) (*PostgresRepository, error) {
+func NewPostgresRepository(ctx context.Context, cfg config.Repo) (*Repository, error) {
 	if cfg.Name == "" {
 		return nil, fmt.Errorf("repository name not specified")
 	}
@@ -24,5 +24,5 @@ func NewPostgresRepository(ctx context.Context, cfg config.Repo) (*PostgresRepos
 		return nil, fmt.Errorf("could not ping postgres: %w", err)
 	}
 
-	return &PostgresRepository{pool: pool}, nil
+	return &Repository{pool: pool}, nil
 }
