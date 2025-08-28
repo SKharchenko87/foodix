@@ -9,22 +9,15 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/SKharchenko87/foodix/internal/handler/product"
 	"github.com/SKharchenko87/foodix/internal/service"
+	"github.com/SKharchenko87/foodix/internal/transport/handler/product"
 	"github.com/SKharchenko87/foodix/pkg/config"
 )
 
-// HTTPServer структура для http сервера
-type HTTPServer struct {
-	srv *http.Server
-	log *slog.Logger
-}
-
 // NewHTTPServer возвращает экземпляр HTTPServer
-func NewHTTPServer(cfg config.Server, productService *service.ProductService, log *slog.Logger) *HTTPServer {
+func NewHTTPServer(cfg config.Server, productService service.ProductService, logger *slog.Logger) HTTPServer {
 	mux := http.NewServeMux()
-
-	GetProductByNameHandler := product.NewGetProductByNameHandler(productService, log)
+	GetProductByNameHandler := product.NewGetProductByNameHandler(productService, logger)
 	mux.HandleFunc("GET /product", GetProductByNameHandler.Handle)
 
 	addr := cfg.Host + ":" + strconv.Itoa(cfg.Port)
@@ -35,12 +28,19 @@ func NewHTTPServer(cfg config.Server, productService *service.ProductService, lo
 		WriteTimeout: 5 * time.Second, // ToDo вынести в config
 		IdleTimeout:  120 * time.Second,
 	}
-	return &HTTPServer{server, log}
+	res := HTTPServerImpl{server, logger}
+	return &res
+}
+
+// HTTPServerImpl структура для http сервера
+type HTTPServerImpl struct {
+	srv    *http.Server
+	logger *slog.Logger
 }
 
 // RunServer запуск веб сервера
-func (h *HTTPServer) RunServer(ctx context.Context) error {
-	h.log.InfoContext(ctx, "Сервер запущен", "addr", h.srv.Addr)
+func (h *HTTPServerImpl) RunServer(ctx context.Context) error {
+	h.logger.InfoContext(ctx, "Сервер запущен", "addr", h.srv.Addr)
 	if err := h.srv.ListenAndServe(); err != nil {
 		return fmt.Errorf("error starting server %w", err)
 	}
@@ -48,7 +48,7 @@ func (h *HTTPServer) RunServer(ctx context.Context) error {
 }
 
 // Shutdown выключение сервера
-func (h *HTTPServer) Shutdown(ctx context.Context) error {
-	h.log.InfoContext(ctx, "shutting down http server")
+func (h *HTTPServerImpl) Shutdown(ctx context.Context) error {
+	h.logger.InfoContext(ctx, "shutting down http server")
 	return h.srv.Shutdown(ctx)
 }
