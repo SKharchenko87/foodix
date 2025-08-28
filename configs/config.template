@@ -5,6 +5,10 @@ logger:
 server:
   host: localhost
   port: 8080
+  read_timeout: 5s
+  write_timeout: 5s
+  idle_timeout: 120s
+
 
 repo:
   name: "postgres"

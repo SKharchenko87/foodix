@@ -3,8 +3,11 @@ package config
 
 // Server структура описывающая конфигурацию сервера
 type Server struct {
-	Host string `yaml:"host"`
-	Port int    `yaml:"port"`
+	Host         string `yaml:"host"`
+	Port         int    `yaml:"port"`
+	ReadTimeout  string `yaml:"read_timeout"`
+	WriteTimeout string `yaml:"write_timeout"`
+	IdleTimeout  string `yaml:"idle_timeout"`
 }
 
 // Repo описание конфигурации репозитория источника данных

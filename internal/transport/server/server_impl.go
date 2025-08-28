@@ -14,6 +14,13 @@ import (
 	"github.com/SKharchenko87/foodix/pkg/config"
 )
 
+// Значения по умолчанию для сервера
+const (
+	defaultReadTimeout  = 5 * time.Second
+	defaultWriteTimeout = 5 * time.Second
+	defaultIdleTimeout  = 120 * time.Second
+)
+
 // NewHTTPServer возвращает экземпляр HTTPServer
 func NewHTTPServer(cfg config.Server, productService service.ProductService, logger *slog.Logger) HTTPServer {
 	mux := http.NewServeMux()
@@ -21,12 +28,31 @@ func NewHTTPServer(cfg config.Server, productService service.ProductService, log
 	mux.HandleFunc("GET /product", GetProductByNameHandler.Handle)
 
 	addr := cfg.Host + ":" + strconv.Itoa(cfg.Port)
+
+	readTimeout, err := time.ParseDuration(cfg.ReadTimeout)
+	if err != nil {
+		logger.Warn("Failed to parse ReadTimeout value:", "warning", err, "default", defaultReadTimeout)
+		readTimeout = defaultReadTimeout
+	}
+
+	writeTimeout, err := time.ParseDuration(cfg.WriteTimeout)
+	if err != nil {
+		logger.Warn("Failed to parse WriteTimeout value:", "warning", err, "default", defaultWriteTimeout)
+		writeTimeout = defaultWriteTimeout
+	}
+
+	idleTimeout, err := time.ParseDuration(cfg.IdleTimeout)
+	if err != nil {
+		logger.Warn("Failed to parse IdleTimeout value:", "warning", err, "default", defaultIdleTimeout)
+		idleTimeout = defaultIdleTimeout
+	}
+
 	server := &http.Server{
 		Addr:         addr,
 		Handler:      mux,
-		ReadTimeout:  5 * time.Second, // ToDo вынести в config
-		WriteTimeout: 5 * time.Second, // ToDo вынести в config
-		IdleTimeout:  120 * time.Second,
+		ReadTimeout:  readTimeout,
+		WriteTimeout: writeTimeout,
+		IdleTimeout:  idleTimeout,
 	}
 	res := HTTPServerImpl{server, logger}
 	return &res
