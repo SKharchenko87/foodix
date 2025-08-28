@@ -15,13 +15,14 @@ import (
 )
 
 func main() {
-	if err := runApp(); err != nil {
-		slog.Error("Application failed", "error", err)
+	bootstrapLogger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	if err := runApp(bootstrapLogger); err != nil {
+		bootstrapLogger.Error("Application failed", "error", err)
 		os.Exit(1)
 	}
 }
 
-func runApp() error {
+func runApp(bootstrapLogger *slog.Logger) error {
 	// Определяем путь к конфигурации
 	configPath, ok := os.LookupEnv("FOODIX_CONFIG")
 	if !ok {
@@ -47,14 +48,14 @@ func runApp() error {
 	// Запускаем приложение в отдельной goroutine, что бы отрабатывал graceful shutdown
 	go func() {
 		if err = app.Start(ctx); err != nil {
-			slog.Error("Application failed", "error", err)
+			bootstrapLogger.Error("Application failed", "error", err)
 			cancel()
 		}
 	}()
 
 	// Graceful shutdown полное завершение работы
 	<-ctx.Done()
-	slog.Info("graceful shutting down...")
+	bootstrapLogger.Info("Graceful shutting down...")
 
 	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer shutdownCancel()
@@ -63,6 +64,6 @@ func runApp() error {
 		return fmt.Errorf("graceful shutdown failed: %w", err)
 	}
 
-	slog.Info("graceful shutdown complete")
+	bootstrapLogger.Info("Graceful shutdown complete")
 	return nil
 }

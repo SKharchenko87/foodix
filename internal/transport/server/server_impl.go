@@ -3,6 +3,7 @@ package server
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -66,8 +67,8 @@ type HTTPServerImpl struct {
 
 // RunServer запуск веб сервера
 func (h *HTTPServerImpl) RunServer(ctx context.Context) error {
-	h.logger.InfoContext(ctx, "Сервер запущен", "addr", h.srv.Addr)
-	if err := h.srv.ListenAndServe(); err != nil {
+	h.logger.InfoContext(ctx, "Server starting", "addr", h.srv.Addr)
+	if err := h.srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		return fmt.Errorf("error starting server %w", err)
 	}
 	return nil
@@ -75,6 +76,6 @@ func (h *HTTPServerImpl) RunServer(ctx context.Context) error {
 
 // Shutdown выключение сервера
 func (h *HTTPServerImpl) Shutdown(ctx context.Context) error {
-	h.logger.InfoContext(ctx, "shutting down http server")
+	h.logger.InfoContext(ctx, "Shutting down http server")
 	return h.srv.Shutdown(ctx)
 }
