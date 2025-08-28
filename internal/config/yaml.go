@@ -23,7 +23,7 @@ type YAMLConfig struct {
 }
 
 // NewYAMLConfig возвращает новый объект YAMLConfig
-func NewYAMLConfig() *YAMLConfig {
+func NewYAMLConfig() config.Config {
 	res := &YAMLConfig{}
 	return res
 }
