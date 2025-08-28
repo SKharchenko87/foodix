@@ -9,12 +9,8 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/SKharchenko87/foodix/internal/application"
 	internalconfig "github.com/SKharchenko87/foodix/internal/config"
-	"github.com/SKharchenko87/foodix/internal/repository"
-	"github.com/SKharchenko87/foodix/internal/server"
-	"github.com/SKharchenko87/foodix/internal/service"
-	"github.com/SKharchenko87/foodix/pkg/config"
-	"github.com/SKharchenko87/foodix/pkg/logger"
 )
 
 type appArgs struct {
@@ -22,6 +18,7 @@ type appArgs struct {
 }
 
 func main() {
+
 	if err := runApp(); err != nil {
 		slog.Error("Application failed", "error", err)
 		os.Exit(1)
@@ -40,37 +37,22 @@ func runApp() error {
 	}
 
 	// Применяем конфигурацию
-	var cfg config.Config = internalconfig.NewYAMLConfig()
+	var cfg = internalconfig.NewYAMLConfig()
 	if err = cfg.Load(args.configPath); err != nil {
 		return err
 	}
 
-	// Инициализируем logger
-	log := logger.InitLogger(cfg.GetLogger())
-	log.InfoContext(ctx, "Starting application", "config_path", args.configPath)
-
-	// Настраиваем репозиторий
-	productRepo, err := repository.NewRepository(ctx, cfg.GetRepo())
+	// Запускаем приложение
+	app, err := application.NewApplication(cfg)
 	if err != nil {
-		log.ErrorContext(ctx, "Failed to initialize repository", "error", err)
 		return err
 	}
-	if productRepo != nil {
-		defer productRepo.Close()
-	}
-
-	// Сервис с бизнес логикой
-	productService := service.NewProductService(productRepo)
-
-	// Запускам сервер
-	httpServer := server.NewHTTPServer(cfg.GetServer(), productService, log)
-	if err = httpServer.RunServer(ctx); err != nil {
-		log.ErrorContext(ctx, "Failed to start server", "error", err)
+	if err = app.Start(ctx); err != nil {
+		return err
 	}
 
 	// ToDo graceful shutdown.
 
-	log.InfoContext(ctx, "Application stopped successfully")
 	return nil
 }
 
