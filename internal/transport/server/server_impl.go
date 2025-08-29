@@ -14,6 +14,7 @@ import (
 	"github.com/SKharchenko87/foodix/internal/service"
 	"github.com/SKharchenko87/foodix/internal/transport/handler/product"
 	"github.com/SKharchenko87/foodix/pkg/config"
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 // Значения по умолчанию для сервера
@@ -26,6 +27,11 @@ const (
 // NewHTTPServer возвращает экземпляр HTTPServer
 func NewHTTPServer(cfg config.Server, productService service.ProductService, logger *slog.Logger) HTTPServer {
 	mux := http.NewServeMux()
+
+	mux.Handle("/swagger/", httpSwagger.Handler(
+		httpSwagger.URL("http://localhost:8080/swagger/doc.json"), // URL, где будет лежать ваш swagger.json
+	))
+
 	GetProductByNameHandler := product.NewGetProductByNameHandler(productService, logger)
 	mux.HandleFunc("GET /product", GetProductByNameHandler.Handle)
 

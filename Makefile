@@ -11,3 +11,7 @@ clean:
 	rm -f ./bin/foodix
 vet:
 	go vet
+tidy:
+	go mod tidy
+swag:
+	swag init --dir ./cmd/server/,./

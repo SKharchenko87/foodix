@@ -10,10 +10,18 @@ import (
 	"syscall"
 	"time"
 
+	_ "github.com/SKharchenko87/foodix/docs"
 	"github.com/SKharchenko87/foodix/internal/application"
 	internalconfig "github.com/SKharchenko87/foodix/internal/config"
 )
 
+// @title Foodix API
+// @Version 1.0
+// @description Foodix - REST API продуктов питания для интеграции с внешними сервисами
+// @contact.name Сергей Харченко
+// @contact.email contact@sergeykharchenko.ru
+// @host localhost:8080
+// @BasePath /
 func main() {
 	bootstrapLogger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	if err := runApp(bootstrapLogger); err != nil {
