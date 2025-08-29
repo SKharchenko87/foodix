@@ -34,3 +34,4 @@ go.work.sum
 
 configs/config.yaml
 bin/
+docs/

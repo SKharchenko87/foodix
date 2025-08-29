@@ -9,6 +9,15 @@ import (
 	"github.com/SKharchenko87/foodix/internal/service"
 )
 
+// ProductResponse - структура для ответа
+type ProductResponse struct {
+	Name          string  `json:"name"`
+	Calories      float64 `json:"calories"`
+	Proteins      float64 `json:"proteins"`
+	Fats          float64 `json:"fats"`
+	Carbohydrates float64 `json:"carbohydrates"`
+}
+
 // GetProductByNameHandlerImpl структура для ручки получения продукта
 type GetProductByNameHandlerImpl struct {
 	productService service.ProductService
@@ -21,7 +30,16 @@ func NewGetProductByNameHandler(service service.ProductService, logger *slog.Log
 	return &res
 }
 
-// Handle ручка
+// Handle godoc
+// @Summary Продукт
+// @Description Возвращает КЖБУ продукта
+// @Accept json
+// @Produce json
+// @Param name query string true "Имя продукта"
+// @Success 200 {object} ProductResponse "Успешный ответ"
+// @Failure 400 {string} string "Неверный запрос, отсутствует параметр 'name'"
+// @Router /product [get]
+// @Tags Product
 func (handler *GetProductByNameHandlerImpl) Handle(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
