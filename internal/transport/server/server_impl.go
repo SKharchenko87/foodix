@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/SKharchenko87/foodix/internal/middleware"
 	"github.com/SKharchenko87/foodix/internal/service"
 	"github.com/SKharchenko87/foodix/internal/transport/handler/product"
 	"github.com/SKharchenko87/foodix/pkg/config"
@@ -27,6 +28,8 @@ func NewHTTPServer(cfg config.Server, productService service.ProductService, log
 	mux := http.NewServeMux()
 	GetProductByNameHandler := product.NewGetProductByNameHandler(productService, logger)
 	mux.HandleFunc("GET /product", GetProductByNameHandler.Handle)
+
+	handler := middleware.RequestIDMiddleware(mux)
 
 	addr := cfg.Host + ":" + strconv.Itoa(cfg.Port)
 
@@ -50,7 +53,7 @@ func NewHTTPServer(cfg config.Server, productService service.ProductService, log
 
 	server := &http.Server{
 		Addr:         addr,
-		Handler:      mux,
+		Handler:      handler,
 		ReadTimeout:  readTimeout,
 		WriteTimeout: writeTimeout,
 		IdleTimeout:  idleTimeout,

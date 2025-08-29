@@ -2,10 +2,12 @@
 package logger
 
 import (
+	"context"
 	"log/slog"
 	"os"
 	"strings"
 
+	"github.com/SKharchenko87/foodix/internal/middleware"
 	"github.com/SKharchenko87/foodix/pkg/config"
 )
 
@@ -19,7 +21,9 @@ func InitLogger(configLogger config.Logger) *slog.Logger {
 	}
 
 	var handler slog.Handler
-	opts := &slog.HandlerOptions{Level: level}
+	opts := &slog.HandlerOptions{
+		Level: level,
+	}
 
 	switch strings.ToLower(configLogger.Format) {
 	case "json":
@@ -28,5 +32,37 @@ func InitLogger(configLogger config.Logger) *slog.Logger {
 		handler = slog.NewTextHandler(os.Stdout, opts)
 	}
 
+	handler = CustomHandlerLogger{handler}
+
 	return slog.New(handler)
+}
+
+// CustomHandlerLogger кастомный logger обработчик добавляющий request_id
+type CustomHandlerLogger struct {
+	handler slog.Handler
+}
+
+// Enabled todo
+func (c CustomHandlerLogger) Enabled(ctx context.Context, level slog.Level) bool {
+	return c.handler.Enabled(ctx, level)
+}
+
+// Handle todo
+func (c CustomHandlerLogger) Handle(ctx context.Context, record slog.Record) error {
+	newRecord := record
+	if requestID, ok := ctx.Value(middleware.RequestIDKey{}).(string); ok {
+		requestIDAttr := slog.String("request_id", requestID)
+		newRecord.AddAttrs(requestIDAttr)
+	}
+	return c.handler.Handle(ctx, newRecord)
+}
+
+// WithAttrs todo
+func (c CustomHandlerLogger) WithAttrs(attrs []slog.Attr) slog.Handler {
+	return c.handler.WithAttrs(attrs)
+}
+
+// WithGroup todo
+func (c CustomHandlerLogger) WithGroup(name string) slog.Handler {
+	return c.handler.WithGroup(name)
 }
