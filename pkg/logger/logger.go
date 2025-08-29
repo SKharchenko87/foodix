@@ -42,12 +42,12 @@ type CustomHandlerLogger struct {
 	handler slog.Handler
 }
 
-// Enabled todo
+// Enabled делегирует вызов вложенному обработчику
 func (c CustomHandlerLogger) Enabled(ctx context.Context, level slog.Level) bool {
 	return c.handler.Enabled(ctx, level)
 }
 
-// Handle todo
+// Handle добавляем из контекста request_id
 func (c CustomHandlerLogger) Handle(ctx context.Context, record slog.Record) error {
 	newRecord := record
 	if requestID, ok := ctx.Value(middleware.RequestIDKey{}).(string); ok {
@@ -57,12 +57,12 @@ func (c CustomHandlerLogger) Handle(ctx context.Context, record slog.Record) err
 	return c.handler.Handle(ctx, newRecord)
 }
 
-// WithAttrs todo
+// WithAttrs делегирует вызов вложенному обработчику
 func (c CustomHandlerLogger) WithAttrs(attrs []slog.Attr) slog.Handler {
 	return c.handler.WithAttrs(attrs)
 }
 
-// WithGroup todo
+// WithGroup делегирует вызов вложенному обработчику
 func (c CustomHandlerLogger) WithGroup(name string) slog.Handler {
 	return c.handler.WithGroup(name)
 }
