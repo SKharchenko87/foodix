@@ -3,12 +3,14 @@ package server
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 	"net/http"
 	"strconv"
 	"time"
 
+	"github.com/SKharchenko87/foodix/internal/middleware"
 	"github.com/SKharchenko87/foodix/internal/service"
 	"github.com/SKharchenko87/foodix/internal/transport/handler/product"
 	"github.com/SKharchenko87/foodix/pkg/config"
@@ -26,6 +28,8 @@ func NewHTTPServer(cfg config.Server, productService service.ProductService, log
 	mux := http.NewServeMux()
 	GetProductByNameHandler := product.NewGetProductByNameHandler(productService, logger)
 	mux.HandleFunc("GET /product", GetProductByNameHandler.Handle)
+
+	handler := middleware.RequestIDMiddleware(mux)
 
 	addr := cfg.Host + ":" + strconv.Itoa(cfg.Port)
 
@@ -49,7 +53,7 @@ func NewHTTPServer(cfg config.Server, productService service.ProductService, log
 
 	server := &http.Server{
 		Addr:         addr,
-		Handler:      mux,
+		Handler:      handler,
 		ReadTimeout:  readTimeout,
 		WriteTimeout: writeTimeout,
 		IdleTimeout:  idleTimeout,
@@ -66,8 +70,8 @@ type HTTPServerImpl struct {
 
 // RunServer запуск веб сервера
 func (h *HTTPServerImpl) RunServer(ctx context.Context) error {
-	h.logger.InfoContext(ctx, "Сервер запущен", "addr", h.srv.Addr)
-	if err := h.srv.ListenAndServe(); err != nil {
+	h.logger.InfoContext(ctx, "Server starting", "addr", h.srv.Addr)
+	if err := h.srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		return fmt.Errorf("error starting server %w", err)
 	}
 	return nil
@@ -75,6 +79,6 @@ func (h *HTTPServerImpl) RunServer(ctx context.Context) error {
 
 // Shutdown выключение сервера
 func (h *HTTPServerImpl) Shutdown(ctx context.Context) error {
-	h.logger.InfoContext(ctx, "shutting down http server")
+	h.logger.InfoContext(ctx, "Shutting down http server")
 	return h.srv.Shutdown(ctx)
 }

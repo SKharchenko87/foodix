@@ -3,18 +3,21 @@ package postgres
 
 import (
 	"context"
+	"log/slog"
 
 	"github.com/SKharchenko87/foodix/internal/domain/models"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-// PostgresRepository структура для подключения к БД
+// Repository структура для подключения к БД
 type Repository struct {
-	pool *pgxpool.Pool
+	pool   *pgxpool.Pool
+	logger *slog.Logger
 }
 
 // Close закрываем пул соединений
 func (p Repository) Close() {
+	p.logger.Info("Repository closed")
 	p.pool.Close()
 }
 

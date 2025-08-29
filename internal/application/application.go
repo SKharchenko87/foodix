@@ -27,7 +27,7 @@ func NewApplication(cfg config.Config) (*Application, error) {
 	appLogger.Info("Creating new application")
 
 	// Инициализируем репозиторий
-	productRepo, err := repository.NewRepository(context.Background(), cfg.GetRepo())
+	productRepo, err := repository.NewRepository(context.Background(), cfg.GetRepo(), appLogger)
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize repository: %w", err)
 	}
@@ -50,7 +50,7 @@ func NewApplication(cfg config.Config) (*Application, error) {
 func (app *Application) Start(ctx context.Context) error {
 
 	// Инициализируем logger
-	app.logger.InfoContext(ctx, "Starting application")
+	app.logger.InfoContext(ctx, "Starting application...")
 
 	// Запускам сервер
 	if err := app.server.RunServer(ctx); err != nil {

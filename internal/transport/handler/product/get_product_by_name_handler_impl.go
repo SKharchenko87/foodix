@@ -33,7 +33,7 @@ func (handler *GetProductByNameHandlerImpl) Handle(w http.ResponseWriter, r *htt
 		return
 	}
 
-	handler.logger.Debug("query find product", "name", name)
+	handler.logger.DebugContext(ctx, "query find product", "name", name)
 
 	product, err := handler.productService.GetProduct(ctx, name)
 	if err != nil {
@@ -42,7 +42,7 @@ func (handler *GetProductByNameHandlerImpl) Handle(w http.ResponseWriter, r *htt
 	}
 
 	if err = json.NewEncoder(w).Encode(product); err != nil {
-		handler.logger.Error("product json encode error", "name", name, "err", err)
+		handler.logger.ErrorContext(ctx, "product json encode error", "name", name, "err", err)
 	}
 
 }
