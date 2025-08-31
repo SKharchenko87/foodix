@@ -22,7 +22,7 @@ func RequestIDMiddleware(next http.Handler) http.Handler {
 }
 
 // GetRequestID получаем RequestID из контекста
-func GetRequestID(ctx context.Context) string {
-	requestID := ctx.Value(RequestIDKey{}).(string)
-	return requestID
+func GetRequestID(ctx context.Context) (string, bool) {
+	requestID, ok := ctx.Value(RequestIDKey{}).(string)
+	return requestID, ok
 }

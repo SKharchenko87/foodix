@@ -50,7 +50,7 @@ func (c CustomHandlerLogger) Enabled(ctx context.Context, level slog.Level) bool
 // Handle добавляем из контекста request_id
 func (c CustomHandlerLogger) Handle(ctx context.Context, record slog.Record) error {
 	newRecord := record
-	if requestID, ok := ctx.Value(middleware.RequestIDKey{}).(string); ok {
+	if requestID, ok := middleware.GetRequestID(ctx); ok {
 		requestIDAttr := slog.String("request_id", requestID)
 		newRecord.AddAttrs(requestIDAttr)
 	}
