@@ -13,7 +13,6 @@ type Server struct {
 // Repo описание конфигурации репозитория источника данных
 type Repo struct {
 	Name string `yaml:"name"`
-	DSN  string `yaml:"dsn"`
 }
 
 // Logger конфигурация логирования

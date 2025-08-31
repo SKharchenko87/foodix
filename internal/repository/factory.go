@@ -15,7 +15,7 @@ func NewRepository(ctx context.Context, cfg config.Repo, logger *slog.Logger) (P
 	repoType := strings.ToLower(cfg.Name)
 	switch repoType {
 	case "postgres":
-		return postgres.NewPostgresRepository(ctx, cfg, logger)
+		return postgres.NewPostgresRepository(ctx, logger)
 	default:
 		return nil, fmt.Errorf("repository type %s not supported", repoType)
 	}
