@@ -1,3 +1,5 @@
+// Package middleware содержит HTTP middleware для работы с контекстом,
+// включая генерацию уникального идентификатора запроса (RequestID).
 package middleware
 
 import (
