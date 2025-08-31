@@ -55,10 +55,10 @@ func generateConnectPostgresString() (string, error) {
 	if !exists {
 		err = errors.Join(err, errors.New("POSTGRES_PORT not found"))
 	}
-	var port int
-	port, err = strconv.Atoi(portStr)
-	if err != nil {
-		err = errors.Join(err, errors.New("POSTGRES_PORT must be an integer"))
+
+	port, tmpErr := strconv.Atoi(portStr)
+	if tmpErr != nil {
+		err = errors.Join(err, errors.New("POSTGRES_PORT must be an integer"), tmpErr)
 	}
 
 	return fmt.Sprintf("postgres://%s:%s@%s:%d/%s", user, password, host, port, db), err
