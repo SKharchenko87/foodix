@@ -1,0 +1,7 @@
+bin
+configs
+.dockerignore
+.golangci.yml
+.gitignore
+Dockerfile
+README.md
